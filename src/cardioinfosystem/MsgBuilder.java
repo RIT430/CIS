@@ -24,8 +24,6 @@ import java.util.logging.Logger;
 public final class MsgBuilder {
 
 	private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm"); //HL7 standard time format
-	private static final String mirthInputDir = "TEST.TXT"; //replace with appropriate path
-	private static FileWriter writer;
 	private static ArrayList<String> MSH_fields;
 	private static ArrayList<String> EVN_fields;
 	private static ArrayList<String> PID_fields;
@@ -70,7 +68,7 @@ public final class MsgBuilder {
 		EVN_fields.addAll(0, Collections.nCopies(4, ""));
 		PID_fields = new ArrayList<>(Arrays.asList("1"));
 		PID_fields.addAll(Collections.nCopies(17, ""));
-		PV1_fields = new ArrayList<>(Arrays.asList("1","I","","A"));
+		PV1_fields = new ArrayList<>(Arrays.asList("1","","","A"));
 		PV1_fields.addAll(Collections.nCopies(6, ""));
 		PV1_fields.addAll(Collections.nCopies(35, ""));
 		ORC_fields = new ArrayList<>(Collections.nCopies(9, ""));
@@ -140,21 +138,23 @@ public final class MsgBuilder {
 		fieldsList.get(5).set(24, msgData.get(22)); //STATUS
 		
 		String orderMsg = construct_message(segList, fieldsList);
-//		System.out.print(orderMsg);
-		
-		try {
-			writer = new FileWriter(mirthInputDir);
-			writer.write(orderMsg);
-			writer.close();
-		} catch (IOException ex) {
-			Logger.getLogger(MsgBuilder.class.getName()).log(Level.SEVERE, null, ex);
-		}
 	}
 
 	/**
-	 * Generate a new ORU message.
+	 * Generate a new ORU message. (Send results to CPOE.)
+	 * Expected order of msgData: EVN2_RECDT, EVN3_DTPLAN, EVN5_OPERID,
+	 * PID3_IDLIST, PID5_PTNAME, PID7_DOB, PID8_SEX, PID11_ADDRESS,
+	 * PID13_HOMEPH, PID14_WORKPH, PID18_ACC, PV1-3_LOC, PV1-7_ATTENDING,
+	 * PV1-10_SERVICE, PV1-44_ADMIT, PV1-45_DSCHG, ORC3_FILLER, ORC9_DTTRANS,
+	 * OBR3_FILLER, OBR4_UID, OBR7_OBSDT, OBR16_PROV, OBR25_STATUS
+	 * @param msgData Parameters pulled from database for <code>construct_message()</code>.
 	 */
-	public static void sendResults() {
-		
+	public static void sendResults(ArrayList<String> msgData) {
+		List<String> segList = Arrays.asList("MSH","PID","PV1","OBR");
+		//figure out how many OBX here
+		String msgData.get(20);
+		prefillSegmentFields();
+		List<List<String>> fieldsList = Arrays.asList(MSH_fields,EVN_fields,PID_fields,PV1_fields,ORC_fields,OBR_fields);
 	}
+		
 }
