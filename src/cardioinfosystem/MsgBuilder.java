@@ -5,16 +5,13 @@
  */
 package cardioinfosystem;
 
-import java.io.FileWriter;
-import java.io.IOException;
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -23,11 +20,9 @@ import java.util.logging.Logger;
  */
 public final class MsgBuilder {
 
-	private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm"); //HL7 standard time format
+	private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss"); //HL7 standard time format
 	private static ArrayList<String> MSH_fields;
-	private static ArrayList<String> EVN_fields;
 	private static ArrayList<String> PID_fields;
-	private static ArrayList<String> PV1_fields;
 	private static ArrayList<String> ORC_fields;
 	private static ArrayList<String> OBR_fields;
 	private static ArrayList<String> OBX_fields;
@@ -41,38 +36,60 @@ public final class MsgBuilder {
 	/**
 	 * Generic function to construct an HL7 message.
 	 * @param segList List of HL7 segments to construct message with.
-	 * @param fieldsList List of fields for segments named in <code>segList</code>.
+	 * @param fieldsPerSeg list of number of supported fields per segment
 	 * @return <code>msg</code> constructed HL7 message
 	 */
-	private static String construct_message(List<String> segList, List<List<String>> fieldsList) {
+	private static String constructEmptyMsg(List<String> segList, List<Integer> fieldsPerSeg) {
 		String msg = "";
 		int segIndex = 0;
 		for (String seg : segList) {
 			msg = msg.concat(seg);
-			List<String> fields = fieldsList.get(segIndex);
-			for (String field : fields) {
-				msg = msg.concat("|"+field);
+			int segFields = fieldsPerSeg.get(segIndex).intValue();
+			for (int i=0; i < segFields; i++) {
+				msg = msg.concat("|{" + i + "}");
 			}
 			msg = msg.concat("\n");
 			segIndex++;
 		}
-//		System.out.print(msg.replace('\r', '\n'));
+		
 		return msg;
 	}
 	
-	private static void prefillSegmentFields() {
-		MSH_fields = new ArrayList<>();
-		MSH_fields.addAll(Arrays.asList("^~\\&", "CIS", "RIT430", "BEDBOARD", "SMH", "P", "2.3"));
-		MSH_fields.addAll(5, Collections.nCopies(4, ""));
-		EVN_fields = new ArrayList<>(Arrays.asList("CIS"));
-		EVN_fields.addAll(0, Collections.nCopies(4, ""));
-		PID_fields = new ArrayList<>(Arrays.asList("1"));
-		PID_fields.addAll(Collections.nCopies(17, ""));
-		PV1_fields = new ArrayList<>(Arrays.asList("1","","","A"));
-		PV1_fields.addAll(Collections.nCopies(6, ""));
-		PV1_fields.addAll(Collections.nCopies(35, ""));
-		ORC_fields = new ArrayList<>(Collections.nCopies(9, ""));
-		OBR_fields = new ArrayList<>(Collections.nCopies(24, ""));
+	private static void padEmptyFields(ArrayList<String> segList, ArrayList<String> data) {
+	
+		do {
+			for (String seg : segList) {
+				switch (seg) {
+						case "MSH":
+							data.addAll(0,Arrays.asList("^~\\&", "CIS", "RIT430", "BEDBOARD", "SMH", "P", "2.3"));
+							data.addAll(5, Collections.nCopies(4, ""));
+						case "PID":
+							data.add(11,"1");
+							data.add(13,"");
+							data.add(15,"");
+							data.add(17,"");
+							data.add(20,"");
+							data.add(21,"");
+							data.add(23,"");
+							data.addAll(26,Collections.nCopies(3, ""));
+						case "ORC":
+							data.addAll(32,Collections.nCopies(5, ""));
+						case "OBR":
+							data.add(38,"1");
+							
+							//38
+							
+						case "OBX":
+							continue;
+						default:
+							break;
+			
+				}
+			}
+		} while(true);
+		
+	
+
 		OBR_fields.add(0, "1");
 //		OBX_fields = Arrays.asList();
 	}
@@ -88,19 +105,26 @@ public final class MsgBuilder {
 	}
 
 	/**
-	 * Generate a new ORM-SN message. (Send filler number to CPOE.)<br>
-	 * Expected order of msgData: EVN2_RECDT, EVN3_DTPLAN, EVN5_OPERID,
+	 * Generate a new ORM-SN message.<br>
+	 * Expected order of msgData: 
 	 * PID3_IDLIST, PID5_PTNAME, PID7_DOB, PID8_SEX, PID11_ADDRESS,
-	 * PID13_HOMEPH, PID14_WORKPH, PID18_ACC, PV1-3_LOC, PV1-7_ATTENDING,
-	 * PV1-10_SERVICE, PV1-44_ADMIT, PV1-45_DSCHG, ORC3_FILLER, ORC9_DTTRANS,
+	 * PID13_HOMEPH, PID14_WORKPH, PID18_ACC, ORC3_FILLER, ORC9_DTTRANS,
 	 * OBR3_FILLER, OBR4_UID, OBR7_OBSDT, OBR16_PROV, OBR25_STATUS
-	 * @param msgData Parameters pulled from database for <code>construct_message()</code>.
+	 * @param msgData Parameters pulled from database for <code>constructEmptyMessage()</code>.
+	 * @return 
 	 */
-	public static void sendFillerNumber(ArrayList<String> msgData) {
-		List<String> segList = Arrays.asList("MSH","EVN","PID","PV1","ORC","OBR");
-		prefillSegmentFields();
-		List<List<String>> fieldsList = Arrays.asList(MSH_fields,EVN_fields,PID_fields,PV1_fields,ORC_fields,OBR_fields);
+	public static String createMsgSN(ArrayList<String> msgData) {
+		List<String> segList = Arrays.asList("MSH","PID","ORC","OBR");
+		padEmptyFields(msgData);
+//		List<List<String>> fieldsList = Arrays.asList(MSH_fields,PID_fields,ORC_fields,OBR_fields);
 
+		List<Integer> fieldsPerSeg = Arrays.asList(new Integer(11), new Integer(9), new Integer(4), new Integer(7));
+		String msgPattern = MsgBuilder.constructEmptyMsg(segList, fieldsPerSeg);
+		
+		String msgSN = MessageFormat.format(msgPattern, msgData.toArray());
+		return msgSN;
+		
+		/*
 		//MSH
 		fieldsList.get(0).set(5, assignDateTime());
 		fieldsList.get(0).set(7, "ORM^O01");
@@ -137,7 +161,8 @@ public final class MsgBuilder {
 		fieldsList.get(5).set(15, msgData.get(21)); //PROV
 		fieldsList.get(5).set(24, msgData.get(22)); //STATUS
 		
-		String orderMsg = construct_message(segList, fieldsList);
+		String orderMsg = constructEmptyMessage(segList, fieldsList);
+		*/
 	}
 
 	/**
@@ -147,13 +172,13 @@ public final class MsgBuilder {
 	 * PID13_HOMEPH, PID14_WORKPH, PID18_ACC, PV1-3_LOC, PV1-7_ATTENDING,
 	 * PV1-10_SERVICE, PV1-44_ADMIT, PV1-45_DSCHG, ORC3_FILLER, ORC9_DTTRANS,
 	 * OBR3_FILLER, OBR4_UID, OBR7_OBSDT, OBR16_PROV, OBR25_STATUS
-	 * @param msgData Parameters pulled from database for <code>construct_message()</code>.
+	 * @param msgData Parameters pulled from database for <code>constructEmptyMessage()</code>.
 	 */
 	public static void sendResults(ArrayList<String> msgData) {
 		List<String> segList = Arrays.asList("MSH","PID","PV1","OBR");
 		//figure out how many OBX here
 		String msgData.get(20);
-		prefillSegmentFields();
+		padEmptyFields();
 		List<List<String>> fieldsList = Arrays.asList(MSH_fields,EVN_fields,PID_fields,PV1_fields,ORC_fields,OBR_fields);
 	}
 		
