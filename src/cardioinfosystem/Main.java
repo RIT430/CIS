@@ -65,8 +65,13 @@ public class Main {
 
                                 System.out.println("What would you like to do?\n");
                                 System.out.println("1 - Create SN Order\n"
-                                                 + "2 - Send Results\n"
-                                                 + "3 - Quit\n");
+                                                 + "2 - Send Preliminary Echo Results\n"
+                                                 + "3 - Send Final Echo Results\n"
+                                                 + "4 - Send Cancelled Echo Results\n"
+                                                 + "5 - Send Preliminary ECG Results\n"
+                                                 + "6 - Send Final ECG Results\n"
+                                                 + "7 - Send Cancelled ECG Results\n"
+                                                 + "8 - Quit\n");
 
                                 try {
                                     input = br.readLine();
@@ -79,9 +84,19 @@ public class Main {
 
                                     case "1": 
 
-                                    case "2": // Calls method to send result
+                                    case "2": 
+                                        
+                                    case "3":   
+                                            
+                                    case "4":   
+                                                
+                                    case "5":   
+                                                    
+                                    case "6":   
+                                                        
+                                    case "7":   
 
-                                    case "3":   break;
+                                    case "8":   
 
                                     default: System.out.println("Invalid input.\n");
                                 }
