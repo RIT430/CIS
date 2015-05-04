@@ -23,24 +23,24 @@ import java.util.Date;
  */
 public class DB_Manipulator 
 {
-    private static Statement stmt = null;
-    private static ResultSet rs = null;
-    private static Connection connection;
-    private static PreparedStatement prepStmt;
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm"); //HL7 standard time format
+    private  Statement stmt = null;
+    private  ResultSet rs = null;
+    private  Connection connection;
+    private  PreparedStatement prepStmt;
+    private  final SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm"); //HL7 standard time format
 
-    private DB_Manipulator() throws ClassNotFoundException, SQLException {
+    public DB_Manipulator() throws ClassNotFoundException, SQLException {
         //Register the JDBC driver for MySQL.
         Class.forName("com.mysql.jdbc.Driver");
         // Use localhost or 127.0.0.1 to point to your machine
-        String url = "jdbc:mysql://127.0.0.1/cis_db";
+        String url = "jdbc:mysql://127.0.0.1:3306/CIS_DB";
         String userName = "cisman";
         String password = "cisman";
         connection = DriverManager.getConnection(url, userName, password);
         stmt = connection.createStatement();
     }            
        
-        public static boolean checkCISID(String cis_id) throws SQLException {
+        public boolean checkCISID(String cis_id) throws SQLException {
             
             boolean exists = true;
 
@@ -49,7 +49,7 @@ public class DB_Manipulator
                 /*
                  *  The Prepared Statement will pull out resultset of MRN
                  */
-                prepStmt = connection.prepareStatement("SELECT cis_id FROM patient_info WHERE ident_list = " + cis_id);
+                prepStmt = connection.prepareStatement("SELECT cis_id FROM patient_info WHERE  = " + cis_id);
 
                 @SuppressWarnings("LocalVariableHidesMemberVariable")
                 ResultSet rs = prepStmt.executeQuery();
@@ -66,7 +66,7 @@ public class DB_Manipulator
             return exists;
         }
         
-        public static String createFillerNumber(String cis_id, String sender_num, String order_content) throws SQLException {
+        public String createFillerNumber(String cis_id, String sender_num, String order_content) throws SQLException {
             
             String filler_num = "";
             
@@ -99,7 +99,7 @@ public class DB_Manipulator
             return filler_num;
         }
         
-        public static String getDataSN(String cis_id) throws SQLException {
+        public String getDataSN(String cis_id) throws SQLException {
 
             String filler = createFillerNumber(cis_id, "", ""); // generates filler number
             
@@ -162,7 +162,7 @@ public class DB_Manipulator
                     + patient_acc + "$" + orc_filler + "$" + orc_dttrans + "$" + obr_filler + "$" + obr_uid + "$" + assignDateTime() + "$" + provider_id;
         }   
         
-        public static String getResults(String cis_id) throws SQLException {
+        public String getResults(String cis_id) throws SQLException {
             
             String mrn = "";
             String name = "";
@@ -232,7 +232,7 @@ public class DB_Manipulator
                     + patient_acc + "$" + orc_filler + "$" + orc_dttrans + "$" + obr_filler + "$" + obr_uid + "$" + assignDateTime() + "$" + provider_id + "$" + status + "$" + result_value;
         }   
         
-	private static String assignDateTime() {
+	private String assignDateTime() {
 		Date currentDateTime = new Date();
 		return formatter.format(currentDateTime);
 	}
