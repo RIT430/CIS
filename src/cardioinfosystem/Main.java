@@ -48,7 +48,7 @@ public class Main {
                 System.out.println("Welcome to the Cardiology Information System.");
                 
 		do {
-			System.out.println("Please enter a patient's MRN.\n");
+			System.out.println("Please enter a patient's ID.\n");
 			try {
                             cis_id = br.readLine();
                         } 
@@ -84,12 +84,12 @@ public class Main {
                                      
                                     case "3": break;
 
-                                    default: System.out.println("Invalid input.\n");
+                                    default: System.out.println("Invalid input.\n"); break;
                                 }
 
                             } else {
 
-                                System.out.println("That patient does not exist in the database.\n");
+                                System.out.println("That patient does not exist in the database.\n"); break;
                             }
                         }
                         catch (SQLException sqle) {
@@ -116,7 +116,7 @@ public class Main {
 			writer.write(msg);
 			writer.close();
 		} catch (IOException ex) {
-			Logger.getLogger(MsgBuilder.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		/**
 		 * Generate new filler number.

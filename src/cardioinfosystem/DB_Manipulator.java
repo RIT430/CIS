@@ -163,8 +163,6 @@ public class DB_Manipulator
         }   
         
         public static String getResults(String cis_id) throws SQLException {
-
-            String filler = createFillerNumber(mrn, "", ""); // generates filler number
             
             String mrn = "";
             String name = "";
