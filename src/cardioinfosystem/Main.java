@@ -12,6 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -19,16 +21,15 @@ import java.io.*;
  */
 public class Main {
 
-	private FileWriter writer;
-	private final String mirthInputDir = "TEST.TXT"; //replace with appropriate path
-
+	private static FileWriter writer;
+	private final static String mirthInputDir = "TEST.TXT"; //replace with appropriate path
 
 	/**
 	 * @param args the command line arguments
 	 */
 	public static void main(String[] args) {
 
-        String mrn = "";
+        String cis_id = "";
         String input = "";
         String type = "";
         String status = "";
@@ -49,7 +50,7 @@ public class Main {
 		do {
 			System.out.println("Please enter a patient's MRN.\n");
 			try {
-                            mrn = br.readLine();
+                            cis_id = br.readLine();
                         } 
                         catch (IOException ioe) {
                             System.out.print(ioe.getMessage());
@@ -61,17 +62,12 @@ public class Main {
                         
                         try {
                             
-                            if (DB_Manipulator.checkMRN(mrn)) {
+                            if (DB_Manipulator.checkCISID(cis_id)) {
 
                                 System.out.println("What would you like to do?\n");
                                 System.out.println("1 - Create SN Order\n"
-                                                 + "2 - Send Preliminary Echo Results\n"
-                                                 + "3 - Send Final Echo Results\n"
-                                                 + "4 - Send Cancelled Echo Results\n"
-                                                 + "5 - Send Preliminary ECG Results\n"
-                                                 + "6 - Send Final ECG Results\n"
-                                                 + "7 - Send Cancelled ECG Results\n"
-                                                 + "8 - Quit\n");
+                                                 + "2 - Send Results\n"
+                                                 + "3 - Quit\n");
 
                                 try {
                                     input = br.readLine();
@@ -82,21 +78,11 @@ public class Main {
 
                                 switch (input) {
 
-                                    case "1": 
+                                    case "1": sendMsg(DB_Manipulator.getDataSN(cis_id));
 
-                                    case "2": 
-                                        
-                                    case "3":   
-                                            
-                                    case "4":   
-                                                
-                                    case "5":   
-                                                    
-                                    case "6":   
-                                                        
-                                    case "7":   
-
-                                    case "8":   
+                                    case "2": sendMsg(DB_Manipulator.getResults(cis_id));
+                                     
+                                    case "3": break;
 
                                     default: System.out.println("Invalid input.\n");
                                 }
@@ -126,9 +112,9 @@ public class Main {
 
 	private static void sendMsg(String msg) {
 		try {
-			MsgBuilder.writer = new FileWriter(MsgBuilder.mirthInputDir);
-			MsgBuilder.writer.write(msg);
-			MsgBuilder.writer.close();
+			writer = new FileWriter(mirthInputDir);
+			writer.write(msg);
+			writer.close();
 		} catch (IOException ex) {
 			Logger.getLogger(MsgBuilder.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -137,10 +123,8 @@ public class Main {
 		 *
 		 * @return
 		 */
-    
-	private int assignOrderNumber() {
-		//should probably find highest value stored in orders table, then return that+1
-		return 0;
-	}
+        }
+        
+
 
 }
