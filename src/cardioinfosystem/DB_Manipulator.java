@@ -166,8 +166,6 @@ public class DB_Manipulator {
 		String homeph = "";
 		String workph = "";
 		String patient_acc = "";
-		String orc_filler = "";
-		String orc_dttrans = assignDateTime();
 		String obr_filler = "";
 		String obr_uid = "";
 		String status = "";
@@ -200,7 +198,6 @@ public class DB_Manipulator {
 			rs = prepStmt.executeQuery();
 
 			while (rs.next()) {
-				orc_filler = rs.getString(1);
 				obr_filler = rs.getString(1);
 				provider_id = rs.getString(2);
 				obr_uid = rs.getString(3);
@@ -214,7 +211,7 @@ public class DB_Manipulator {
 			prepStmt.close();
 		}
 		return mrn + "$" + name + "$" + dob + "$" + sex + "$" + address + "$" + homeph + "$" + workph + "$"
-				+ patient_acc + "$" + orc_filler + "$" + orc_dttrans + "$" + obr_filler + "$" + obr_uid + "$"
+				+ patient_acc + "$" + "$" + obr_filler + "$" + obr_uid + "$"
 				+ assignDateTime() + "$" + provider_id + "$" + status + "$" + result_value;
 				//assignDateTime() here is OBR7_OBSDT
 	}
