@@ -44,7 +44,7 @@ public class DB_Manipulator {
 			/*
 			 *  The Prepared Statement will pull out resultset of MRN
 			 */
-			prepStmt = connection.prepareStatement("SELECT cis_id FROM patient_info WHERE  = " + cis_id);
+			prepStmt = connection.prepareStatement("SELECT cis_id FROM patient_info WHERE cis_id = " + cis_id);
 			rs = prepStmt.executeQuery();
 			if (!rs.next()) {
 				exists = false;
@@ -58,21 +58,35 @@ public class DB_Manipulator {
 		return exists;
 	}
 
-	public static String createFillerNumber(String cis_id, String sender_num, String order_content) throws SQLException {
+	public static String createFillerNumber(String cis_id) throws SQLException {
 		String filler_num = "";
-
+                String PT_MRN = "";
+                String PROVIDER_ID = "";
 		try {
 
 			/*
 			 *  The Prepared Statement will insert sender_id, order content,
 			 */
+                        prepStmt = connection.prepareStatement(
+                                        "Select PT_ID from patient_info where CIS_ID = " + cis_id);
+                        rs = prepStmt.executeQuery();
+                        while (rs.next()){
+                            PT_MRN = rs.getString(1);
+                        }
+                        prepStmt = connection.prepareStatement(
+                                        "Select DOCTOR_ID from visit where PT_ID = " + PT_MRN);
+                        rs = prepStmt.executeQuery();
+                        while (rs.next()){
+                            PROVIDER_ID = rs.getString(1);
+                        }
+                        
 			prepStmt = connection.prepareStatement(
-					"INSERT INTO TABLE order (cpoe_id, order_content, cis_id) VALUES ("
-					+ sender_num + ", " + order_content + ", " + cis_id + " where cis_id = " + cis_id + ")");
+					"INSERT INTO cis_order (PT_ID, TEST_CODE, TEST_DESCRIPTION, OBS_DATE, PROVIDER_ID, RESULT_STATUS) VALUES ('"
+					+ PT_MRN + "', 'ECHO', 'ECHOCARDIOGRAM', '201504191955', " + PROVIDER_ID + ", 'P')");
 			prepStmt.execute();
 
 			prepStmt = connection.prepareStatement(
-					"SELECT cis_order_id FROM order WHERE cis_id = " + cis_id);
+					"SELECT FILLER_ID FROM cis_order WHERE PT_ID = " + PT_MRN);
 			rs = prepStmt.executeQuery();
 
 			while (rs.next()) {
@@ -88,7 +102,7 @@ public class DB_Manipulator {
 	}
 
 	public static String getDataSN(String cis_id) throws SQLException {
-		String filler = createFillerNumber(cis_id, "", ""); // generates filler number
+		String filler = createFillerNumber(cis_id); // generates filler number
 
 		String mrn = "";
 		String name = "";
@@ -101,13 +115,13 @@ public class DB_Manipulator {
 		String orc_filler = filler;
 		String orc_dttrans = assignDateTime();
 		String obr_filler = filler;
-		String obr_uid = "Echo";
+		String obr_uid = "ECHO";
 //		String obr_obsdt = ""; Variable is not used, time is generated when msg is sent
 		String provider_id = "";
 
 		try {
 			// get the patient data
-			prepStmt = connection.prepareStatement("SELECT Ident_List, Pt_Name, Pt_DOB, Pt_DOB, Pt_Address, Home_Phone, Work_Phone, Pt_Acct_Num FROM patient WHERE cis_id = " + cis_id);
+			prepStmt = connection.prepareStatement("SELECT PT_ID, Pt_Name, Pt_DOB, Pt_GENDER, Pt_Address, Home_Phone, Work_Phone, Pt_Acct_Num FROM patient_info WHERE cis_id = " + cis_id);
 			rs = prepStmt.executeQuery();
 
 			while (rs.next()) {
@@ -123,18 +137,20 @@ public class DB_Manipulator {
 
 			// get the doctor id
 			prepStmt = connection.prepareStatement(
-					"SELECT Doctor_ID FROM visit WHERE CIS_ID = " + cis_id);
+					"SELECT Doctor_ID FROM visit WHERE PT_ID = " + mrn);
 			rs = prepStmt.executeQuery();
 
 			while (rs.next()) {
 				provider_id = rs.getString(1);
 			}
+                        
 
 		} catch (SQLException se) {
 			System.out.println("Error in DB_Manipulator.getDataSN: " + se);
 		} finally {
 			prepStmt.close();
 		}
+
 		return mrn + "$" + name + "$" + dob + "$" + sex + "$" + address + "$" + homeph + "$" + workph + "$"
 				+ patient_acc + "$" + orc_filler + "$" + orc_dttrans + "$" + obr_filler + "$" + obr_uid + "$"
 				+ assignDateTime() + "$" + provider_id; //assignDateTime() here is OBR7_OBSDT
@@ -162,7 +178,7 @@ public class DB_Manipulator {
 		try {
 			// getting the patient data
 			prepStmt = connection.prepareStatement(
-					"SELECT Ident_List, Pt_Name, Pt_DOB, Pt_DOB, Pt_Address, Home_Phone, Work_Phone, Pt_Acct_Num FROM patient WHERE ident_list = " + cis_id);
+					"SELECT PT_ID, Pt_Name, Pt_DOB, Pt_GENDER, Pt_Address, Home_Phone, Work_Phone, Pt_Acct_Num FROM patient_info WHERE CIS_ID = " + cis_id);
 
 			rs = prepStmt.executeQuery();
 
@@ -180,7 +196,7 @@ public class DB_Manipulator {
 			// getting the doctor id               
 			// getting the filler number
 			prepStmt = connection.prepareStatement(
-					"SELECT cis_order_id, provider_id, test_code, result_status, result_value FROM cis_order WHERE cis_id = " + cis_id);
+					"SELECT FILLER_ID, provider_id, test_code, result_status, result_value FROM cis_order WHERE PT_ID = " + mrn);
 			rs = prepStmt.executeQuery();
 
 			while (rs.next()) {

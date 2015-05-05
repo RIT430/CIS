@@ -10,7 +10,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import java.io.*;
 
 /**
@@ -20,7 +19,7 @@ import java.io.*;
 public class Main {
 
 	private static FileWriter writer;
-	private final static String mirthInputDir = "TEST.TXT"; //replace with appropriate path
+	private static String mirthInputDir; //replace with appropriate path
 
 	/**
 	 * @param args the command line arguments
@@ -42,7 +41,7 @@ public class Main {
 		System.out.println("Welcome to the Cardiology Information System.");
 
 		do {
-			System.out.println("Please enter a patient's ID.\n");
+			System.out.println("Please enter a patient's ID or zero to quit.\n");
 			try {
 				cis_id = br.readLine();
 			} catch (IOException ioe) {
@@ -57,7 +56,7 @@ public class Main {
 					System.out.println("What would you like to do?\n");
 					System.out.println("1 - Create SN Order\n"
 							+ "2 - Send Results\n"
-							+ "3 - Quit\n");
+							+ "3 - Select Another Patient\n");
 
 					try {
 						input = br.readLine();
@@ -67,8 +66,10 @@ public class Main {
 					switch (input) {
 						case "1":
 							sendMsg(DB_Manipulator.getDataSN(cis_id));
+                                                        break;
 						case "2":
 							sendMsg(DB_Manipulator.getResults(cis_id));
+                                                        break;
 						case "3":
 							break;
 						default:
@@ -76,7 +77,6 @@ public class Main {
 							break;
 					}
 				} else {
-
 					System.out.println("That patient does not exist in the database.\n");
 					break;
 				}
@@ -97,6 +97,13 @@ public class Main {
 	}
 
 	private static void sendMsg(String msg) {
+            if(msg.contains("OBX") && msg.contains("ECHO")){
+                mirthInputDir = "ORU_ECHO.txt";
+            }else if(msg.contains("OBX") && msg.contains("ECG")){
+                mirthInputDir = "ORU_ECG.txt";
+            }else{
+                mirthInputDir = "ORM_SN.txt";
+            }
 		try {
 			writer = new FileWriter(mirthInputDir);
 			writer.write(msg);
