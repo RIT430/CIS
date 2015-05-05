@@ -211,7 +211,7 @@ public class DB_Manipulator {
 			prepStmt.close();
 		}
 		return mrn + "$" + name + "$" + dob + "$" + sex + "$" + address + "$" + homeph + "$" + workph + "$"
-				+ patient_acc + "$" + "$" + obr_filler + "$" + obr_uid + "$"
+				+ patient_acc + "$" + obr_filler + "$" + obr_uid + "$"
 				+ assignDateTime() + "$" + provider_id + "$" + status + "$" + result_value;
 				//assignDateTime() here is OBR7_OBSDT
 	}
