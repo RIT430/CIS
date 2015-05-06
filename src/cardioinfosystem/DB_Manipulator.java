@@ -73,9 +73,9 @@ public class DB_Manipulator {
                         while (rs.next()){
                             PT_MRN = rs.getString(1);
                         }
-                        prepStmt = connection.prepareStatement(
-                                        "Select DOCTOR_ID from visit where PT_ID = " + PT_MRN);
-                        rs = prepStmt.executeQuery();
+			prepStmt = connection.prepareStatement(
+					"SELECT DOCTOR_ID FROM visit WHERE PT_ID = " + PT_MRN);
+			rs = prepStmt.executeQuery();
                         while (rs.next()){
                             PROVIDER_ID = rs.getString(1);
                         }
@@ -157,7 +157,6 @@ public class DB_Manipulator {
 	}
 
 	public static String getResults(String cis_id) throws SQLException {
-
 		String mrn = "";
 		String name = "";
 		String dob = "";
@@ -206,7 +205,7 @@ public class DB_Manipulator {
 			}
 
 		} catch (SQLException se) {
-			System.out.println("Error in DB_Manipulator.getDataSN: " + se.getMessage());
+			System.out.println("Error in DB_Manipulator.getResults: " + se.getMessage());
 		} finally {
 			prepStmt.close();
 		}

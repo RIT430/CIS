@@ -19,7 +19,7 @@ import java.io.*;
 public class Main {
 
 	private static FileWriter writer;
-	private static String mirthInputDir; //replace with appropriate path
+	private static String mirthInputDir = ""; //replace with appropriate path
 
 	/**
 	 * @param args the command line arguments
@@ -97,12 +97,13 @@ public class Main {
 	}
 
 	private static void sendMsg(String msg) {
+            mirthInputDir = "C:\\Users\\Student\\Desktop\\MEDI 430\\inbox\\";
             if(msg.contains("OBX") && msg.contains("ECHO")){
-                mirthInputDir = "ORU_ECHO.txt";
+                mirthInputDir += "ORU_ECHO.txt";
             }else if(msg.contains("OBX") && msg.contains("ECG")){
-                mirthInputDir = "ORU_ECG.txt";
+                mirthInputDir += "ORU_ECG.txt";
             }else{
-                mirthInputDir = "ORM_SN.txt";
+                mirthInputDir += "ORM_SN.txt";
             }
 		try {
 			writer = new FileWriter(mirthInputDir);
@@ -112,5 +113,4 @@ public class Main {
 			Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-
 }
